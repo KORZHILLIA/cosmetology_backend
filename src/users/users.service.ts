@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from "mongoose";
-// import  { nanoid } from 'nanoid';
+import { nanoid } from 'nanoid';
 
-import { User } from "src/schemas/user.schema";
+import { User } from "src/schemas/user.mongooseSchema";
 import { SignupReqBody } from "src/interfaces/user.interface";
 
 import hashPassword from 'src/helpers/hashPassword';
@@ -18,7 +18,7 @@ export class UsersService {
 
     async createNewUser(user: SignupReqBody) {
         const hashedPassword = await hashPassword(user.password);
-        const verificationToken = 'hjiu890';
+        const verificationToken = nanoid(5);
         const newUser = await this.userModel.create({ ...user, password: hashedPassword, verificationToken });
         return newUser;
     }
