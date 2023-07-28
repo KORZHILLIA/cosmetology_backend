@@ -1,16 +1,23 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, ConflictException } from '@nestjs/common';
 
 import { UsersService } from './users.service';
 
-import { User } from 'src/interfaces/user.interface';
+import { SignupReqBody } from 'src/interfaces/user.interface';
+import { User } from 'src/schemas/user.schema';
+
 
 @Controller('users')
 export class UsersController {
     constructor(private usersService: UsersService) { }
     
     @Post()
-    add(@Body() user: User) {
-        return this.usersService.add(user);
+    async signup(@Body() user: SignupReqBody) {
+        const isUserInDB = await this.usersService.findUserByEmail(user.email);
+        if (isUserInDB) {
+            throw new ConflictException('This email already in use');
+        }
+        const newUser = await this.usersService.createNewUser(user);
+        return newUser;
     }
 
 }
