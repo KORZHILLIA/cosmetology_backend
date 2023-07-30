@@ -1,10 +1,7 @@
-import { ConfigService } from '@nestjs/config';
 const sgMail = require('@sendgrid/mail');
 
-const configService = new ConfigService();
-sgMail.setApiKey('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');
-
-const sendMail = async (to: string, token: string): Promise<boolean> => {
+const sendMail = async (key: string, to: string, token: string): Promise<boolean | string> => {
+    sgMail.setApiKey(key);
     const mail = {
         to,
         from: 'kiev_drum2006@ukr.net',
@@ -15,7 +12,7 @@ const sendMail = async (to: string, token: string): Promise<boolean> => {
         await sgMail.send(mail);
         return true;
     } catch (error: any) {
-        throw error.message;
+        return error.message;
     }
 };
 
