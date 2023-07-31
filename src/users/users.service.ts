@@ -10,6 +10,7 @@ import { SignupReqBody } from "src/interfaces/user.interface";
 
 import hashPassword from 'src/helpers/hashPassword';
 import sendMail from "src/helpers/sendMail";
+import encodeStringForURL from "src/helpers/encodeStringForURL";
 
 @Injectable()
 export class UsersService {
@@ -47,5 +48,23 @@ const isMailSent = await sendMail(sendgridKey, email, token);
 
     async updateUserIsVerified(userId: Types.ObjectId) {
         return await this.userModel.findByIdAndUpdate(userId, {isVerified: true, verificationToken: ''}, {new: true});
+    }
+
+    async retrieveUnverificatedUser(email: string) {
+        const user = await this.userModel.findOne({ email });
+        if (!user) {
+            throw new NotFoundException('User not found');
+        } if (user.isVerified) {
+            throw new ConflictException('This user already verified');
+        }
+        return user;
+    }
+
+    prepareEncodedURL(userName: string, userEmail: string): string {
+        const baseUrl = this.configService.get<string>('BASE_URL');
+        const encodedUserName = encodeStringForURL(userName);
+        const encodedEmail = encodeStringForURL(userEmail);
+        const encodedUrl = `${baseUrl}?userName=${encodedUserName}&userEmail=${encodedEmail}`;
+        return encodedUrl;
     }
 }
