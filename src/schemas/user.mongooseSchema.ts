@@ -15,6 +15,10 @@ export class User {
     verificationToken: string;
     @Prop({default: false})
     isVerified: boolean;
+    @Prop({ default: '' })
+    accessToken: string;
+    @Prop({ default: '' })
+    refreshToken: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

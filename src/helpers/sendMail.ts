@@ -1,4 +1,5 @@
-const sgMail = require('@sendgrid/mail');
+// const sgMail = require('@sendgrid/mail');
+import * as sgMail from '@sendgrid/mail';
 
 const sendMail = async (key: string, to: string, token: string): Promise<boolean | string> => {
     sgMail.setApiKey(key);

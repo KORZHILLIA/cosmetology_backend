@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, ForbiddenException, NotFoundException } from "@nestjs/common";
+import { Injectable, ConflictException, ForbiddenException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,12 +11,13 @@ import { SignupReqBody } from "src/interfaces/user.interface";
 import hashPassword from 'src/helpers/hashPassword';
 import sendMail from "src/helpers/sendMail";
 import encodeStringForURL from "src/helpers/encodeStringForURL";
+import comparePasswords from "src/helpers/comparePasswords";
 
 @Injectable()
 export class UsersService {
     constructor(@InjectModel(User.name) private userModel: Model<User>, private jwtService: JwtService, private configService: ConfigService) { }
 
-    async findUserByEmail(email: string): Promise<void> {
+    async checkIsUserNotInDBByEmail(email: string): Promise<void> {
         const user = await this.userModel.findOne({ email });
         if (user) {
 throw new ConflictException('This email already in use');
@@ -58,6 +59,33 @@ const isMailSent = await sendMail(sendgridKey, email, token);
             throw new ConflictException('This user already verified');
         }
         return user;
+    }
+
+    async checkIsUserInDBByEmail(email: string): Promise<void> {
+        const user = await this.userModel.findOne({ email });
+        if (!user) {
+            throw new NotFoundException('There is no user with this email');
+        }
+    }
+
+    async updateUserIsSigned(email: string, password: string) {
+        const user = await this.userModel.findOne({ email });
+        if (!user) {
+            throw new NotFoundException('There is no user with this email');
+        }
+        if (!user.isVerified) {
+            throw new ConflictException('Please verify your email first');
+        }
+        const isPasswordValid = await comparePasswords(password, user.password);
+        if (!isPasswordValid) {
+            throw new UnauthorizedException('This password is invalid');
+        }
+        const payload = { sub: user._id, username: user.name };
+        const accessSecret = this.configService.get<string>('ACCESS_SECRET');
+        const refreshSecret = this.configService.get<string>('REFRESH_SECRET');
+        const accessToken = await this.jwtService.signAsync(payload, { secret: accessSecret, expiresIn: '20m' });
+        const refreshToken = await this.jwtService.signAsync(payload, { secret: refreshSecret, expiresIn: '1d' });
+        return await this.userModel.findByIdAndUpdate(user._id, {accessToken, refreshToken}, {new: true});
     }
 
     prepareEncodedURL(userName: string, userEmail: string): string {

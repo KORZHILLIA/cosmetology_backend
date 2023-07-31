@@ -7,3 +7,8 @@ export interface SignupReqBody {
 export interface ResendEmailReqBody {
     email: string;
 }
+
+export interface SigninReqBody {
+    email: string;
+    password: string;
+}
