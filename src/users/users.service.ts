@@ -17,10 +17,16 @@ import comparePasswords from "src/helpers/comparePasswords";
 export class UsersService {
     constructor(@InjectModel(User.name) private userModel: Model<User>, private jwtService: JwtService, private configService: ConfigService) { }
 
+    async signupUser(user: SignupReqBody) {
+        await this.checkIsUserNotInDBByEmail(user.email);
+        const newUser = await this.createNewUser(user);
+        await this.sendVerificationEmail(newUser.email, newUser.verificationToken);
+    }
+
     async checkIsUserNotInDBByEmail(email: string): Promise<void> {
         const user = await this.userModel.findOne({ email });
         if (user) {
-throw new ConflictException('This email already in use');
+          throw new ConflictException('This email already in use');
         } 
     }
 
@@ -31,13 +37,21 @@ throw new ConflictException('This email already in use');
         return newUser;
     }
 
-    async sendVerificationMail(email: string, token: string): Promise<void> {
+    async sendVerificationEmail(email: string, token: string): Promise<void> {
         const sendgridKey = this.configService.get<string>('SENDGRID_KEY');
 const isMailSent = await sendMail(sendgridKey, email, token);
         if (typeof isMailSent !== 'boolean') {
             throw new ForbiddenException('Confirmation email was not sent');
         }
     }
+
+    async verifyUser(verificationToken: string) {
+        const userNotPreparedForVerificationYet = await this.findUserByVerificationToken(verificationToken);
+        const userPreparedForVerification = await this.updateUserIsVerified(userNotPreparedForVerificationYet._id);
+        const encodedURL = this.prepareEncodedURL(userPreparedForVerification.name, userPreparedForVerification.email);
+        return encodedURL;
+    }
+
 
     async findUserByVerificationToken(verificationToken: string) {
         const user = await this.userModel.findOne({ verificationToken });
@@ -51,6 +65,11 @@ const isMailSent = await sendMail(sendgridKey, email, token);
         return await this.userModel.findByIdAndUpdate(userId, {isVerified: true, verificationToken: ''}, {new: true});
     }
 
+    async resendVerificationEmail(email: string): Promise<void> {
+        const userNotVerifiedYet = await this.retrieveUnverificatedUser(email);
+        await this.sendVerificationEmail(userNotVerifiedYet.email, userNotVerifiedYet.verificationToken);
+    }
+
     async retrieveUnverificatedUser(email: string) {
         const user = await this.userModel.findOne({ email });
         if (!user) {
@@ -61,18 +80,16 @@ const isMailSent = await sendMail(sendgridKey, email, token);
         return user;
     }
 
-    async checkIsUserInDBByEmail(email: string): Promise<void> {
+    async checkIsUserInDBByEmail(email: string) {
         const user = await this.userModel.findOne({ email });
         if (!user) {
             throw new NotFoundException('There is no user with this email');
         }
+        return user;
     }
 
     async updateUserIsSigned(email: string, password: string) {
-        const user = await this.userModel.findOne({ email });
-        if (!user) {
-            throw new NotFoundException('There is no user with this email');
-        }
+        const user = await this.checkIsUserInDBByEmail(email);
         if (!user.isVerified) {
             throw new ConflictException('Please verify your email first');
         }
