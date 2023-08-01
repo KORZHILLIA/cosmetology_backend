@@ -1,5 +1,5 @@
 import { Controller, Post, Get, Body, Param, Response, UsePipes, Redirect, Request, UseGuards } from '@nestjs/common';
-import { Response as Res } from 'express';
+import { Response as Res, Request as Req } from 'express';
 
 import { UsersService } from './users.service';
 import { JoiValidationPipe } from 'src/pipes/validation.pipe';
@@ -40,17 +40,34 @@ export class UsersController {
         return { message: 'Confirmation email has been sent again' };
     }
 
-    @Post('signin')
+    // @Post('signin')
+    // @UsePipes(new JoiValidationPipe(joiSigninSchema))
+    // async signin(@Body() user: SigninReqBody, @Response() res: Res) {
+    //     const signedUser = await this.usersService.updateUserIsSigned(user.email, user.password);
+    //     return res.set({ 'refresh-token': signedUser.refreshToken }).json(signedUser);
+    // }
+
+        @Post('signin')
     @UsePipes(new JoiValidationPipe(joiSigninSchema))
-    async signin(@Body() user: SigninReqBody, @Response() res: Res) {
+    async signin(@Body() user: SigninReqBody, @Response({passthrough: true}) res: Res) {
         const signedUser = await this.usersService.updateUserIsSigned(user.email, user.password);
-        console.log(signedUser);
-        return res.set({ 'refresh-token': signedUser.refreshToken }).json(signedUser);
+            res.cookie('refresh-token', signedUser.refreshToken, {
+                httpOnly: true,
+                secure: false,
+            });
+            return signedUser;
     }
+
+
+    // @UseGuards(UsersGuard)
+    // @Get('profile')
+    // getProfle(@Request() req) {
+    //     return req.user;
+    // }
 
     @UseGuards(UsersGuard)
     @Get('profile')
-    getProfle(@Request() req) {
-        return req.user;
+    getProfle(@Request() req: Req) {
+        return req['user'];
     }
 }

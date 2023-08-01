@@ -80,7 +80,7 @@ const isMailSent = await sendMail(sendgridKey, email, token);
         if (!isPasswordValid) {
             throw new UnauthorizedException('This password is invalid');
         }
-        const payload = { sub: user._id, username: user.name };
+        const payload = { sub: user.email, username: user.name };
         const accessSecret = this.configService.get<string>('ACCESS_SECRET');
         const refreshSecret = this.configService.get<string>('REFRESH_SECRET');
         const accessToken = await this.jwtService.signAsync(payload, { secret: accessSecret, expiresIn: '20m' });
