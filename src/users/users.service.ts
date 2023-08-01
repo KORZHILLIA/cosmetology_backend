@@ -6,7 +6,7 @@ import { Model, Types } from "mongoose";
 import { nanoid } from 'nanoid';
 
 import { User } from "src/schemas/user.mongooseSchema";
-import { SignupReqBody } from "src/interfaces/user.interface";
+import { SignupReqBody, PayloadForTokens, TokensPair } from "src/interfaces/user.interface";
 
 import hashPassword from 'src/helpers/hashPassword';
 import sendMail from "src/helpers/sendMail";
@@ -98,11 +98,25 @@ const isMailSent = await sendMail(sendgridKey, email, token);
             throw new UnauthorizedException('This password is invalid');
         }
         const payload = { sub: user.email, username: user.name };
+        const { accessToken, refreshToken } = await this.prepareTokens(payload);
+        const signedUser = await this.userModel.findByIdAndUpdate(user._id, { accessToken, refreshToken }, { new: true });
+        return signedUser;
+    }
+
+    async getCurrentUser(email: string) {
+        const user = await this.checkIsUserInDBByEmail(email);
+        const payload = { sub: user.email, username: user.name };
+        const { accessToken, refreshToken } = await this.prepareTokens(payload);
+        const userWithUpdatedTokens = await this.userModel.findByIdAndUpdate(user._id, { accessToken, refreshToken }, { new: true });
+        return userWithUpdatedTokens;
+    }
+
+    async prepareTokens(payload: PayloadForTokens): Promise<TokensPair> {
         const accessSecret = this.configService.get<string>('ACCESS_SECRET');
         const refreshSecret = this.configService.get<string>('REFRESH_SECRET');
         const accessToken = await this.jwtService.signAsync(payload, { secret: accessSecret, expiresIn: '20m' });
         const refreshToken = await this.jwtService.signAsync(payload, { secret: refreshSecret, expiresIn: '1d' });
-        return await this.userModel.findByIdAndUpdate(user._id, {accessToken, refreshToken}, {new: true});
+        return { accessToken, refreshToken };
     }
 
     prepareEncodedURL(userName: string, userEmail: string): string {

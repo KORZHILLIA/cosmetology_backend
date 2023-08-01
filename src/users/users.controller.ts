@@ -4,12 +4,16 @@ import { Response as Res, Request as Req } from 'express';
 import { UsersService } from './users.service';
 import { JoiValidationPipe } from 'src/pipes/validation.pipe';
 import { UsersGuard } from './users.guard';
+import { Role } from 'src/roles/roles.decorator';
+import { RolesGuard } from 'src/roles/roles.guard';
 
 import { SignupReqBody, ResendEmailReqBody, SigninReqBody } from 'src/interfaces/user.interface';
+import Roles from 'src/roles/roles.enum';
 import joiSignupSchema from 'src/schemas/user.joiSignupSchema';
 import joiResendEmailSchema from 'src/schemas/user.joiResendEmailSchema';
 import joiSigninSchema from 'src/schemas/user.joiSigninSchema';
 
+@UseGuards(RolesGuard)
 @Controller('users')
 export class UsersController {
     constructor(private usersService: UsersService) { }
@@ -54,8 +58,15 @@ export class UsersController {
     }
 
     @UseGuards(UsersGuard)
-    @Get('profile')
-    getProfle(@Request() req: Req) {
-        return req['user'];
+    @Get('current')
+    @Role(Roles.Admin)
+    async getProfle(@Request() req: Req, @Response({passthrough: true}) res: Res) {
+        const { sub } = req['user'];
+        const currentUser = await this.usersService.getCurrentUser(sub);
+        res.cookie('refresh-token', currentUser.refreshToken, {
+                httpOnly: true,
+                secure: false,
+            });
+            return currentUser;
     }
 }
