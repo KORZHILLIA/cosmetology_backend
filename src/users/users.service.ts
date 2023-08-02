@@ -7,6 +7,7 @@ import { nanoid } from 'nanoid';
 
 import { User } from "src/schemas/user.mongooseSchema";
 import { SignupReqBody, PayloadForTokens, TokensPair } from "src/interfaces/user.interface";
+import Roles from "src/roles/roles.enum";
 
 import hashPassword from 'src/helpers/hashPassword';
 import sendMail from "src/helpers/sendMail";
@@ -32,8 +33,13 @@ export class UsersService {
 
     async createNewUser(user: SignupReqBody) {
         const hashedPassword = await hashPassword(user.password);
-        const verificationToken = nanoid(5);
-        const newUser = await this.userModel.create({ ...user, password: hashedPassword, verificationToken });
+        const newUserCredentials = this.createNewUserCredentials(user, hashedPassword);
+        // const verificationToken = nanoid(5);
+        // const newUserCredentials = { ...user, password: hashedPassword, verificationToken };
+        // if (user.email === 'kievdrum1983@gmail.com') {
+        //     newUserCredentials['role'] = Roles.Admin;
+        // }
+        const newUser = await this.userModel.create(newUserCredentials);
         return newUser;
     }
 
@@ -125,5 +131,15 @@ const isMailSent = await sendMail(sendgridKey, email, token);
         const encodedEmail = encodeStringForURL(userEmail);
         const encodedUrl = `${baseUrl}?userName=${encodedUserName}&userEmail=${encodedEmail}`;
         return encodedUrl;
+    }
+
+    createNewUserCredentials(user: SignupReqBody, password: string) {
+        const adminEmail = this.configService.get<string>('ADMIN_EMAIL');
+        const verificationToken = nanoid(5);
+        const newUserCredentials = { ...user, password, verificationToken };
+        if (user.email === adminEmail) {
+            newUserCredentials['role'] = Roles.Admin;
+        }
+        return newUserCredentials;
     }
 }
