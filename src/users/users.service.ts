@@ -125,6 +125,11 @@ const isMailSent = await sendMail(sendgridKey, email, token);
         return { accessToken, refreshToken };
     }
 
+    async getAllUsers() {
+        const users = await this.userModel.find({ role: 'user' });
+        return users;
+    }
+
     prepareEncodedURL(userName: string, userEmail: string): string {
         const baseUrl = this.configService.get<string>('BASE_URL');
         const encodedUserName = encodeStringForURL(userName);

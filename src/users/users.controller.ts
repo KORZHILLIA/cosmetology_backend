@@ -13,7 +13,7 @@ import joiSignupSchema from 'src/schemas/user.joiSignupSchema';
 import joiResendEmailSchema from 'src/schemas/user.joiResendEmailSchema';
 import joiSigninSchema from 'src/schemas/user.joiSigninSchema';
 
-@UseGuards(RolesGuard)
+@UseGuards(RolesGuard, UsersGuard)
 @Controller('users')
 export class UsersController {
     constructor(private usersService: UsersService) { }
@@ -49,24 +49,37 @@ export class UsersController {
         @Post('signin')
     @UsePipes(new JoiValidationPipe(joiSigninSchema))
     async signin(@Body() user: SigninReqBody, @Response({passthrough: true}) res: Res) {
-        const signedUser = await this.usersService.updateUserIsSigned(user.email, user.password);
-            res.cookie('refresh-token', signedUser.refreshToken, {
+            const signedUser = await this.usersService.updateUserIsSigned(user.email, user.password);
+            const {name, email, isVerified, accessToken, refreshToken} = signedUser;
+            res.cookie('refresh-token', refreshToken, {
                 httpOnly: true,
                 secure: false,
             });
-            return signedUser;
+            return {name, email, isVerified, accessToken};
     }
 
-    @UseGuards(UsersGuard)
     @Get('current')
-    @Role(Roles.Admin)
     async getProfle(@Request() req: Req, @Response({passthrough: true}) res: Res) {
+        const userWithUpdatedTokens = await this.updateUserTokens(req, res);
+        const { name, email, isVerified, accessToken } = userWithUpdatedTokens;
+        return {name, email, isVerified, accessToken};
+    }
+    
+    @Get('all')
+    @Role(Roles.Admin)
+    async getAll(@Request() req: Req, @Response({passthrough: true}) res: Res) {
+        const userWithUpdatedTokens = await this.updateUserTokens(req, res);
+        const users = await this.usersService.getAllUsers();
+        return {accsessToken: userWithUpdatedTokens.accessToken, users};
+    }
+
+    async updateUserTokens(req: Req, res: Res) {
         const { sub } = req['user'];
-        const currentUser = await this.usersService.getCurrentUser(sub);
-        res.cookie('refresh-token', currentUser.refreshToken, {
-                httpOnly: true,
-                secure: false,
-            });
-            return currentUser;
+        const userWithUpdatedTokens = await this.usersService.getCurrentUser(sub);
+        res.cookie('refresh-token', userWithUpdatedTokens.refreshToken, {
+            httpOnly: true,
+            secure: false,
+        });
+        return userWithUpdatedTokens;
     }
 }
