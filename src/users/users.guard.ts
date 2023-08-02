@@ -9,7 +9,7 @@ export class UsersGuard implements CanActivate {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
-        if (request.path === '/users/all' || request.path === '/users/current') {
+        if (request.path === '/users/all' || request.path === '/users/current' || request.path === '/dates/new') {
             try {
                 const accessToken = this.extractAccessTokenFromHeader(request);
                 const accessSecret = this.configService.get<string>('ACCESS_SECRET');

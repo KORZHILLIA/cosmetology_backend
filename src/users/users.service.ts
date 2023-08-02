@@ -1,18 +1,19 @@
-import { Injectable, ConflictException, ForbiddenException, NotFoundException, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
+    import { Injectable, ConflictException, ForbiddenException, NotFoundException, UnauthorizedException } from "@nestjs/common";
+    import { ConfigService } from "@nestjs/config";
+    import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from "mongoose";
-import { nanoid } from 'nanoid';
+    import { Response as Res, Request as Req } from 'express';
+    import { Model, Types } from "mongoose";
+    import { nanoid } from 'nanoid';
 
-import { User } from "src/schemas/user.mongooseSchema";
-import { SignupReqBody, PayloadForTokens, TokensPair } from "src/interfaces/user.interface";
-import Roles from "src/roles/roles.enum";
+    import { User } from "src/schemas/user.mongooseSchema";
+    import { SignupReqBody, PayloadForTokens, TokensPair } from "src/interfaces/user.interface";
+    import Roles from "src/roles/roles.enum";
 
-import hashPassword from 'src/helpers/hashPassword';
-import sendMail from "src/helpers/sendMail";
-import encodeStringForURL from "src/helpers/encodeStringForURL";
-import comparePasswords from "src/helpers/comparePasswords";
+    import hashPassword from 'src/helpers/hashPassword';
+    import sendMail from "src/helpers/sendMail";
+    import encodeStringForURL from "src/helpers/encodeStringForURL";
+    import comparePasswords from "src/helpers/comparePasswords";
 
 @Injectable()
 export class UsersService {
@@ -34,11 +35,6 @@ export class UsersService {
     async createNewUser(user: SignupReqBody) {
         const hashedPassword = await hashPassword(user.password);
         const newUserCredentials = this.createNewUserCredentials(user, hashedPassword);
-        // const verificationToken = nanoid(5);
-        // const newUserCredentials = { ...user, password: hashedPassword, verificationToken };
-        // if (user.email === 'kievdrum1983@gmail.com') {
-        //     newUserCredentials['role'] = Roles.Admin;
-        // }
         const newUser = await this.userModel.create(newUserCredentials);
         return newUser;
     }
@@ -128,6 +124,16 @@ const isMailSent = await sendMail(sendgridKey, email, token);
     async getAllUsers() {
         const users = await this.userModel.find({ role: 'user' });
         return users;
+    }
+
+    async updateUserTokens(req: Req, res: Res) {
+        const { sub } = req['user'];
+        const userWithUpdatedTokens = await this.getCurrentUser(sub);
+        res.cookie('refresh-token', userWithUpdatedTokens.refreshToken, {
+            httpOnly: true,
+            secure: false,
+        });
+        return userWithUpdatedTokens;
     }
 
     prepareEncodedURL(userName: string, userEmail: string): string {

@@ -34,8 +34,8 @@ export class UsersController {
 
     @Get('resendEmail')
         @UsePipes(new JoiValidationPipe(joiResendEmailSchema))
-    async resendEmail(@Body() { email }: ResendEmailReqBody) {
-        await this.usersService.resendVerificationEmail(email);
+    async resendEmail(@Body() body: ResendEmailReqBody) {
+        await this.usersService.resendVerificationEmail(body.email);
         return { message: 'Confirmation email has been sent again' };
     }
 
@@ -60,7 +60,7 @@ export class UsersController {
 
     @Get('current')
     async getProfle(@Request() req: Req, @Response({passthrough: true}) res: Res) {
-        const userWithUpdatedTokens = await this.updateUserTokens(req, res);
+        const userWithUpdatedTokens = await this.usersService.updateUserTokens(req, res);
         const { name, email, isVerified, accessToken } = userWithUpdatedTokens;
         return {name, email, isVerified, accessToken};
     }
@@ -68,18 +68,9 @@ export class UsersController {
     @Get('all')
     @Role(Roles.Admin)
     async getAll(@Request() req: Req, @Response({passthrough: true}) res: Res) {
-        const userWithUpdatedTokens = await this.updateUserTokens(req, res);
+        const userWithUpdatedTokens = await this.usersService.updateUserTokens(req, res);
         const users = await this.usersService.getAllUsers();
         return {accsessToken: userWithUpdatedTokens.accessToken, users};
     }
 
-    async updateUserTokens(req: Req, res: Res) {
-        const { sub } = req['user'];
-        const userWithUpdatedTokens = await this.usersService.getCurrentUser(sub);
-        res.cookie('refresh-token', userWithUpdatedTokens.refreshToken, {
-            httpOnly: true,
-            secure: false,
-        });
-        return userWithUpdatedTokens;
-    }
 }

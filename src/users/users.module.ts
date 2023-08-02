@@ -10,6 +10,7 @@ import { UsersService } from "./users.service";
     imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), JwtModule.register({global: true})],
     controllers: [UsersController],
     providers: [UsersService],
+    exports: [UsersService]
 })
 
 export class UsersModule { };
