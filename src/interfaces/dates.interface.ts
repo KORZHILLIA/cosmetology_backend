@@ -7,5 +7,4 @@ export interface AddNewVisitDateBody {
 
 export interface ReserveVisitDateBody {
   role: Roles.User;
-  userID: string;
 }

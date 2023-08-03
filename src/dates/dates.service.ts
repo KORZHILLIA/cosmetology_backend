@@ -27,11 +27,13 @@ export class DatesService {
   }
 
   async getAllVisitDates() {
-    const allVisitDates = await this.visitDateModel.find({});
+    const allVisitDates = await this.visitDateModel
+      .find({})
+      .populate('client', 'name');
     return allVisitDates;
   }
 
-  async reserveVisitDate(visitDateID: string, userID: string) {
+  async reserveVisitDate(visitDateID: string, userID: Types.ObjectId) {
     const requiredVisitDate = await this.visitDateModel.findByIdAndUpdate(
       visitDateID,
       { client: userID },
@@ -42,7 +44,7 @@ export class DatesService {
     const userWithReservedVisitDate = await this.userModel
       .findByIdAndUpdate(
         userID,
-        { $push: { visitDates: visitDateID } },
+        { $addToSet: { visitDates: visitDateID } },
         { new: true },
       )
       .populate('visitDates');

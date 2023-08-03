@@ -67,13 +67,19 @@ export class DatesController {
   @Post('reserve/:visitDateID')
   @Role(Roles.User)
   async reserveVisitDate(
+    @Request() req: Req,
+    @Response({ passthrough: true }) res: Res,
     @Param('visitDateID') visitDateID: string,
-    @Body() body: ReserveVisitDateBody,
   ) {
+    const userWithUpdatedTokens = await this.userService.updateUserTokens(
+      req,
+      res,
+    );
     const userWithReservedVisitDate = await this.datesService.reserveVisitDate(
       visitDateID,
-      body.userID,
+      userWithUpdatedTokens._id,
     );
-    return userWithReservedVisitDate;
+    const { accessToken, visitDates } = userWithReservedVisitDate;
+    return { accessToken, visitDates };
   }
 }
