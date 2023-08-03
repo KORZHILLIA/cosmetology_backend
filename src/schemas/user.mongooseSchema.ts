@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+
+import { VisitDate } from './dates.mongooseSchema';
 
 import Roles from 'src/roles/roles.enum';
 export type UserDocument = HydratedDocument<User>;
@@ -14,6 +16,8 @@ export class User {
   email: string;
   @Prop({ required: [true, 'Password is required'] })
   password: string;
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'VisitDate' }] })
+  visitDates: VisitDate[];
   @Prop({ default: '' })
   verificationToken: string;
   @Prop({ default: false })

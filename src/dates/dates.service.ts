@@ -8,12 +8,14 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { visitDate } from 'src/schemas/dates.mongooseSchema';
+import { VisitDate } from 'src/schemas/dates.mongooseSchema';
+import { User } from 'src/schemas/user.mongooseSchema';
 
 @Injectable()
 export class DatesService {
   constructor(
-    @InjectModel(visitDate.name) private visitDateModel: Model<Date>,
+    @InjectModel(VisitDate.name) private visitDateModel: Model<VisitDate>,
+    @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
   async addNewVisitDates(dates: number[]) {
@@ -22,5 +24,28 @@ export class DatesService {
       new: true,
     });
     return insertedDates;
+  }
+
+  async getAllVisitDates() {
+    const allVisitDates = await this.visitDateModel.find({});
+    return allVisitDates;
+  }
+
+  async reserveVisitDate(visitDateID: string, userID: string) {
+    const requiredVisitDate = await this.visitDateModel.findByIdAndUpdate(
+      visitDateID,
+      { client: userID },
+    );
+    if (!requiredVisitDate) {
+      throw new NotFoundException('There is no such visit date');
+    }
+    const userWithReservedVisitDate = await this.userModel
+      .findByIdAndUpdate(
+        userID,
+        { $push: { visitDates: visitDateID } },
+        { new: true },
+      )
+      .populate('visitDates');
+    return userWithReservedVisitDate;
   }
 }

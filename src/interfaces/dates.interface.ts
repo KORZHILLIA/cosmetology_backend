@@ -4,3 +4,8 @@ export interface AddNewVisitDateBody {
   role: Roles.Admin;
   dates: number[];
 }
+
+export interface ReserveVisitDateBody {
+  role: Roles.User;
+  userID: string;
+}

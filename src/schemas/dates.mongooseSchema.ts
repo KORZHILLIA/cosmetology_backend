@@ -1,21 +1,25 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
-export type visitDateDocument = HydratedDocument<Date>;
+import { User } from './user.mongooseSchema';
+
+export type VisitDateDocument = HydratedDocument<Date>;
 
 @Schema({ versionKey: false, timestamps: true })
-export class visitDate {
+export class VisitDate {
   @Prop()
   visitDate: Date;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  client: User;
 }
 
-export const visitDateSchema = SchemaFactory.createForClass(visitDate);
+export const VisitDateSchema = SchemaFactory.createForClass(VisitDate);
 
-visitDateSchema.pre('save', async function (next) {
-  //   console.log(new Date(new Date('2023-08-03 16:20:00').toUTCString()).getTime());
-  //   console.log(new Date(new Date('2023-08-03 16:25:00').toUTCString()).getTime());
-  // console.log(new Date(new Date('2023-08-03 16:30:00').toUTCString()).getTime());
-  visitDateSchema.path('visitDate').options.expires =
+VisitDateSchema.pre('save', async function (next) {
+  //   console.log(new Date(new Date('2023-08-04 12:20:00').toUTCString()).getTime());
+  //   console.log(new Date(new Date('2023-08-04 13:25:00').toUTCString()).getTime());
+  // console.log(new Date(new Date('2023-08-04 14:30:00').toUTCString()).getTime());
+  VisitDateSchema.path('visitDate').options.expires =
     this.visitDate.getTime() + 60000;
   next();
 });
