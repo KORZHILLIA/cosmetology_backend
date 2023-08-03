@@ -1,6 +1,8 @@
 const encodeStringForURL = (string: string): string => {
-    const encodedArr = new Array(string.length).fill('').map((_, idx) => string.charCodeAt(idx));
-    return encodedArr.join('%');
+  const encodedArr = new Array(string.length)
+    .fill('')
+    .map((_, idx) => string.charCodeAt(idx));
+  return encodedArr.join('%');
 };
 
 export default encodeStringForURL;
