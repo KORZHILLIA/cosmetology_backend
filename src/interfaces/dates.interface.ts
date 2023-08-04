@@ -8,3 +8,7 @@ export interface AddNewVisitDateBody {
 export interface ReserveVisitDateBody {
   role: Roles.User;
 }
+
+export interface PastVisitDate {
+  date: Date;
+}

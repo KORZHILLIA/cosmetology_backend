@@ -13,6 +13,7 @@ import { Model, Types } from 'mongoose';
 import { nanoid } from 'nanoid';
 
 import { User } from 'src/schemas/user.mongooseSchema';
+import { VisitDate } from 'src/schemas/dates.mongooseSchema';
 import {
   SignupReqBody,
   PayloadForTokens,
@@ -29,6 +30,7 @@ import comparePasswords from 'src/helpers/comparePasswords';
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(VisitDate.name) private visitDateModel: Model<VisitDate>,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
@@ -131,23 +133,20 @@ export class UsersService {
     }
     const payload = { sub: user.email, username: user.name };
     const { accessToken, refreshToken } = await this.prepareTokens(payload);
-    const signedUser = await this.userModel.findByIdAndUpdate(
-      user._id,
-      { accessToken, refreshToken },
-      { new: true },
-    );
+    const signedUser = await this.userModel
+      .findByIdAndUpdate(user._id, { accessToken, refreshToken }, { new: true })
+      .populate('futureVisitDates');
     return signedUser;
   }
 
   async getCurrentUser(email: string) {
     const user = await this.checkIsUserInDBByEmail(email);
+    await this.cleanDeadVisitDatesRefs(user);
     const payload = { sub: user.email, username: user.name };
     const { accessToken, refreshToken } = await this.prepareTokens(payload);
-    const userWithUpdatedTokens = await this.userModel.findByIdAndUpdate(
-      user._id,
-      { accessToken, refreshToken },
-      { new: true },
-    );
+    const userWithUpdatedTokens = await this.userModel
+      .findByIdAndUpdate(user._id, { accessToken, refreshToken }, { new: true })
+      .populate('futureVisitDates');
     return userWithUpdatedTokens;
   }
 
@@ -178,6 +177,17 @@ export class UsersService {
       secure: false,
     });
     return userWithUpdatedTokens;
+  }
+
+  async cleanDeadVisitDatesRefs(user: User & { _id: Types.ObjectId }) {
+    await user.futureVisitDates.forEach(async (date) => {
+      const isDateAlive = await this.visitDateModel.findOne({ _id: date });
+      if (!isDateAlive) {
+        await this.userModel.findByIdAndUpdate(user._id, {
+          $pull: { futureVisitDates: date },
+        });
+      }
+    });
   }
 
   prepareEncodedURL(userName: string, userEmail: string): string {

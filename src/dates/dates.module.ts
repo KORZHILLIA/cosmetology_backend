@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 // import { JwtModule } from "@nestjs/jwt";
 
@@ -12,9 +12,14 @@ import { UsersModule } from 'src/users/users.module';
     MongooseModule.forFeature([
       { name: VisitDate.name, schema: VisitDateSchema },
     ]),
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [DatesController],
   providers: [DatesService],
+  exports: [
+    MongooseModule.forFeature([
+      { name: VisitDate.name, schema: VisitDateSchema },
+    ]),
+  ],
 })
 export class DatesModule {}

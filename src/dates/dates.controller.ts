@@ -4,10 +4,10 @@ import {
   Get,
   Body,
   Param,
+  Request,
   Response,
   UsePipes,
   Redirect,
-  Request,
   UseGuards,
 } from '@nestjs/common';
 import { Response as Res, Request as Req } from 'express';
@@ -79,7 +79,26 @@ export class DatesController {
       visitDateID,
       userWithUpdatedTokens._id,
     );
-    const { accessToken, visitDates } = userWithReservedVisitDate;
-    return { accessToken, visitDates };
+    const { accessToken, futureVisitDates } = userWithReservedVisitDate;
+    return { accessToken, futureVisitDates };
+  }
+
+  @Post('refuse/:visitDateID')
+  @Role(Roles.User)
+  async refuseVisitDate(
+    @Request() req: Req,
+    @Response({ passthrough: true }) res: Res,
+    @Param('visitDateID') visitDateID: string,
+  ) {
+    const userWithUpdatedTokens = await this.userService.updateUserTokens(
+      req,
+      res,
+    );
+    const userWithoutVisitDate = await this.datesService.refuseVisitDate(
+      visitDateID,
+      userWithUpdatedTokens._id,
+    );
+    const { accessToken, futureVisitDates } = userWithoutVisitDate;
+    return { accessToken, futureVisitDates };
   }
 }

@@ -71,12 +71,27 @@ export class UsersController {
       user.email,
       user.password,
     );
-    const { name, email, isVerified, accessToken, refreshToken } = signedUser;
+    const {
+      name,
+      email,
+      isVerified,
+      accessToken,
+      refreshToken,
+      futureVisitDates,
+      pastVisitDates,
+    } = signedUser;
     res.cookie('refresh-token', refreshToken, {
       httpOnly: true,
       secure: false,
     });
-    return { name, email, isVerified, accessToken };
+    return {
+      name,
+      email,
+      isVerified,
+      accessToken,
+      futureVisitDates,
+      pastVisitDates,
+    };
   }
 
   @Get('current')
@@ -88,8 +103,22 @@ export class UsersController {
       req,
       res,
     );
-    const { name, email, isVerified, accessToken } = userWithUpdatedTokens;
-    return { name, email, isVerified, accessToken };
+    const {
+      name,
+      email,
+      isVerified,
+      accessToken,
+      futureVisitDates,
+      pastVisitDates,
+    } = userWithUpdatedTokens;
+    return {
+      name,
+      email,
+      isVerified,
+      accessToken,
+      futureVisitDates,
+      pastVisitDates,
+    };
   }
 
   @Get('all')

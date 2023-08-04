@@ -29,7 +29,7 @@ export class DatesService {
   async getAllVisitDates() {
     const allVisitDates = await this.visitDateModel
       .find({})
-      .populate('client', 'name');
+      .populate('client', '_id');
     return allVisitDates;
   }
 
@@ -44,10 +44,36 @@ export class DatesService {
     const userWithReservedVisitDate = await this.userModel
       .findByIdAndUpdate(
         userID,
-        { $addToSet: { visitDates: visitDateID } },
+        {
+          $addToSet: {
+            futureVisitDates: visitDateID,
+            pastVisitDates: { date: requiredVisitDate.visitDate },
+          },
+        },
         { new: true },
       )
-      .populate('visitDates');
+      .populate('futureVisitDates');
     return userWithReservedVisitDate;
+  }
+
+  async refuseVisitDate(visitDateID: string, userID: Types.ObjectId) {
+    const visitDateFreeAgain = await this.visitDateModel.findByIdAndUpdate(
+      visitDateID,
+      { client: null },
+    );
+    if (!visitDateFreeAgain) {
+      throw new NotFoundException('There is no such visit date');
+    }
+    const userWithoutVisitDate = await this.userModel.findByIdAndUpdate(
+      userID,
+      {
+        $pull: {
+          futureVisitDates: visitDateID,
+          pastVisitDates: { date: visitDateFreeAgain.visitDate },
+        },
+      },
+      { new: true },
+    );
+    return userWithoutVisitDate;
   }
 }
