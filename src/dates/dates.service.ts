@@ -34,6 +34,17 @@ export class DatesService {
     return updatedAvailableVisitDateByAdmin;
   }
 
+  async deleteVisitDate(visitDateID: string): Promise<void> {
+    const requiredVisitDate = await this.visitDateModel.findById(visitDateID);
+    if (!requiredVisitDate) {
+      throw new NotFoundException('There is no such visit date');
+    }
+    if (requiredVisitDate.client) {
+      throw new ForbiddenException('This date has the client');
+    }
+    await this.visitDateModel.findByIdAndDelete(visitDateID);
+  }
+
   async getAllVisitDates() {
     const allVisitDates = await this.visitDateModel
       .find({})

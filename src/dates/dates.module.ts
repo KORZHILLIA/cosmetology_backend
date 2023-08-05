@@ -29,6 +29,9 @@ import { UsersModule } from 'src/users/users.module';
   controllers: [DatesController],
   providers: [DatesService],
   exports: [
+    // MongooseModule.forFeature([
+    //   { name: VisitDate.name, schema: VisitDateSchema },
+    // ]),
     MongooseModule.forFeatureAsync([
       {
         name: VisitDate.name,

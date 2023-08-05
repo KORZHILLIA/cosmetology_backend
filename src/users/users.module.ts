@@ -22,12 +22,14 @@ import { DatesModule } from 'src/dates/dates.module';
       },
     ]),
     JwtModule.register({ global: true }),
+    // DatesModule,
     forwardRef(() => DatesModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [
     UsersService,
+    // MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeatureAsync([
       {
         name: User.name,

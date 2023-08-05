@@ -7,25 +7,19 @@ export type VisitDateDocument = HydratedDocument<Date>;
 
 @Schema({ versionKey: false, timestamps: true })
 export class VisitDate {
-  @Prop({ unique: [true, 'haha'] })
+  @Prop()
   visitDate: Date;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', default: null })
   client: User;
   @Prop({ default: false })
   isConfirmed: boolean;
+  @Prop({ expires: 60 })
+  expireAt: Date;
 }
 
 export const VisitDateSchema = SchemaFactory.createForClass(VisitDate);
 
 VisitDateSchema.pre('save', async function (next) {
-  console.log(
-    new Date(new Date('2023-08-05 13:42:00').toUTCString()).getTime(),
-  );
-  console.log(
-    new Date(new Date('2023-08-05 13:47:00').toUTCString()).getTime(),
-  );
-  // console.log(new Date(new Date('2023-08-04 18:30:00').toUTCString()).getTime());
-  VisitDateSchema.path('visitDate').options.expires =
-    this.visitDate.getTime() + 60000;
+  this.expireAt = this.visitDate;
   next();
 });

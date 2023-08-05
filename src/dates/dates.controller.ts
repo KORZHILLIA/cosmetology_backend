@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Put,
+  Delete,
   Body,
   Param,
   Request,
@@ -25,6 +26,8 @@ import {
   AddNewVisitDateBody,
   AlterVisitDateByAdminBody,
 } from 'src/interfaces/dates.interface';
+import joiAddNewVisitDateSchema from 'src/schemas/dates.joiAddNewVisitDateSchema';
+import joiAlterVisitDateSchema from 'src/schemas/dates.joiAlterVisitDateSchema';
 
 @UseGuards(RolesGuard, UsersGuard)
 @Controller('dates')
@@ -35,6 +38,7 @@ export class DatesController {
   ) {}
 
   @Post('new')
+  @UsePipes(new JoiValidationPipe(joiAddNewVisitDateSchema))
   @Role(Roles.Admin)
   async addNewVisitDate(
     @Request() req: Req,
@@ -50,6 +54,7 @@ export class DatesController {
   }
 
   @Put('alter/:visitDateID')
+  @UsePipes(new JoiValidationPipe(joiAlterVisitDateSchema))
   @Role(Roles.Admin)
   async alterAvailableVisitDateByAdmin(
     @Request() req: Req,
@@ -67,6 +72,22 @@ export class DatesController {
     );
     const { accessToken } = userWithUpdatedTokens;
     return { accessToken, alteredDate };
+  }
+
+  @Delete('delete/:visitDateID')
+  @Role(Roles.Admin)
+  async deleteFutureVisitDate(
+    @Request() req: Req,
+    @Response({ passthrough: true }) res: Res,
+    @Param('visitDateID') visitDateID: string,
+  ) {
+    const userWithUpdatedTokens = await this.userService.updateUserTokens(
+      req,
+      res,
+    );
+    await this.datesService.deleteVisitDate(visitDateID);
+    const { accessToken } = userWithUpdatedTokens;
+    return { accessToken, message: 'Visit date has been deleted' };
   }
 
   @Get('all')
