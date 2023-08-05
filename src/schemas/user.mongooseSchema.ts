@@ -19,7 +19,13 @@ export class User {
   @Prop({ required: [true, 'Password is required'] })
   password: string;
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'VisitDate' }],
+    type: [
+      {
+        type: MongooseSchema.Types.ObjectId,
+        ref: 'VisitDate',
+        nullable: false,
+      },
+    ],
     default: [],
   })
   futureVisitDates: VisitDate[];

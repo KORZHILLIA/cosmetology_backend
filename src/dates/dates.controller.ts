@@ -2,6 +2,7 @@ import {
   Controller,
   Post,
   Get,
+  Put,
   Body,
   Param,
   Request,
@@ -22,7 +23,7 @@ import { RolesGuard } from 'src/roles/roles.guard';
 import Roles from 'src/roles/roles.enum';
 import {
   AddNewVisitDateBody,
-  ReserveVisitDateBody,
+  AlterVisitDateByAdminBody,
 } from 'src/interfaces/dates.interface';
 
 @UseGuards(RolesGuard, UsersGuard)
@@ -46,6 +47,26 @@ export class DatesController {
     );
     const newVisitDates = await this.datesService.addNewVisitDates(body.dates);
     return { accessToken: userWithUpdatedTokens.accessToken, newVisitDates };
+  }
+
+  @Put('alter/:visitDateID')
+  @Role(Roles.Admin)
+  async alterAvailableVisitDateByAdmin(
+    @Request() req: Req,
+    @Response({ passthrough: true }) res: Res,
+    @Param('visitDateID') visitDateID: string,
+    @Body() body: AlterVisitDateByAdminBody,
+  ) {
+    const userWithUpdatedTokens = await this.userService.updateUserTokens(
+      req,
+      res,
+    );
+    const alteredDate = await this.datesService.alterVisitDateByAdmin(
+      visitDateID,
+      body.alteredDate,
+    );
+    const { accessToken } = userWithUpdatedTokens;
+    return { accessToken, alteredDate };
   }
 
   @Get('all')
@@ -81,6 +102,22 @@ export class DatesController {
     );
     const { accessToken, futureVisitDates } = userWithReservedVisitDate;
     return { accessToken, futureVisitDates };
+  }
+
+  @Post('confirm/:visitDateID')
+  @Role(Roles.Admin)
+  async confirmUserFutureVisitDate(
+    @Request() req: Req,
+    @Response({ passthrough: true }) res: Res,
+    @Param('visitDateID') visitDateID: string,
+  ) {
+    const userWithUpdatedTokens = await this.userService.updateUserTokens(
+      req,
+      res,
+    );
+    await this.datesService.confirmVisitDate(visitDateID);
+    const { accessToken } = userWithUpdatedTokens;
+    return { accessToken, message: 'Visit date successfully confirmed' };
   }
 
   @Post('refuse/:visitDateID')

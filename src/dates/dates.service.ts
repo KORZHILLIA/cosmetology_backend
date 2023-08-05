@@ -26,6 +26,14 @@ export class DatesService {
     return insertedDates;
   }
 
+  async alterVisitDateByAdmin(visitDateID: string, newDate: number) {
+    const updatedAvailableVisitDateByAdmin = await this.updateVisitDate(
+      visitDateID,
+      { visitDate: newDate },
+    );
+    return updatedAvailableVisitDateByAdmin;
+  }
+
   async getAllVisitDates() {
     const allVisitDates = await this.visitDateModel
       .find({})
@@ -34,13 +42,9 @@ export class DatesService {
   }
 
   async reserveVisitDate(visitDateID: string, userID: Types.ObjectId) {
-    const requiredVisitDate = await this.visitDateModel.findByIdAndUpdate(
-      visitDateID,
-      { client: userID },
-    );
-    if (!requiredVisitDate) {
-      throw new NotFoundException('There is no such visit date');
-    }
+    const requiredVisitDate = await this.updateVisitDate(visitDateID, {
+      client: userID,
+    });
     const userWithReservedVisitDate = await this.userModel
       .findByIdAndUpdate(
         userID,
@@ -57,13 +61,10 @@ export class DatesService {
   }
 
   async refuseVisitDate(visitDateID: string, userID: Types.ObjectId) {
-    const visitDateFreeAgain = await this.visitDateModel.findByIdAndUpdate(
-      visitDateID,
-      { client: null },
-    );
-    if (!visitDateFreeAgain) {
-      throw new NotFoundException('There is no such visit date');
-    }
+    const visitDateFreeAgain = await this.updateVisitDate(visitDateID, {
+      client: null,
+      isConfirmed: false,
+    });
     const userWithoutVisitDate = await this.userModel.findByIdAndUpdate(
       userID,
       {
@@ -75,5 +76,24 @@ export class DatesService {
       { new: true },
     );
     return userWithoutVisitDate;
+  }
+
+  async confirmVisitDate(visitDateID: string) {
+    const confirmedVisitDate = await this.updateVisitDate(visitDateID, {
+      isConfirmed: true,
+    });
+    return confirmedVisitDate;
+  }
+
+  async updateVisitDate(visitDateID: string, updateCore: Record<string, any>) {
+    const updatedVisitDate = await this.visitDateModel.findByIdAndUpdate(
+      visitDateID,
+      updateCore,
+      { new: true },
+    );
+    if (!updatedVisitDate) {
+      throw new NotFoundException('There is no such visit date');
+    }
+    return updatedVisitDate;
   }
 }

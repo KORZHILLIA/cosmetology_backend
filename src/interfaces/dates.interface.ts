@@ -5,8 +5,9 @@ export interface AddNewVisitDateBody {
   dates: number[];
 }
 
-export interface ReserveVisitDateBody {
-  role: Roles.User;
+export interface AlterVisitDateByAdminBody {
+  role: Roles.Admin;
+  alteredDate: number;
 }
 
 export interface PastVisitDate {
