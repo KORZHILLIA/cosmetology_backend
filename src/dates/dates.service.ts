@@ -8,6 +8,8 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
+import checkIsDateNotPast from 'src/helpers/checkIsDateNotPast';
+
 import { VisitDate } from 'src/schemas/dates.mongooseSchema';
 import { User } from 'src/schemas/user.mongooseSchema';
 
@@ -19,6 +21,7 @@ export class DatesService {
   ) {}
 
   async addNewVisitDates(dates: number[]) {
+    this.checkIsReqDateNotPast(dates);
     const preparedDates = dates.map((date) => ({ visitDate: date }));
     const insertedDates = await this.visitDateModel.create([...preparedDates], {
       new: true,
@@ -27,6 +30,7 @@ export class DatesService {
   }
 
   async alterVisitDateByAdmin(visitDateID: string, newDate: number) {
+    this.checkIsReqDateNotPast([newDate]);
     const updatedAvailableVisitDateByAdmin = await this.updateVisitDate(
       visitDateID,
       { visitDate: newDate },
@@ -106,5 +110,11 @@ export class DatesService {
       throw new NotFoundException('There is no such visit date');
     }
     return updatedVisitDate;
+  }
+
+  checkIsReqDateNotPast(dates: number[]): void {
+    if (checkIsDateNotPast(dates)) {
+      throw new ForbiddenException('Please use future dates only');
+    }
   }
 }

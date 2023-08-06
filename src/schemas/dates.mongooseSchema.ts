@@ -7,7 +7,7 @@ export type VisitDateDocument = HydratedDocument<Date>;
 
 @Schema({ versionKey: false, timestamps: true })
 export class VisitDate {
-  @Prop()
+  @Prop({ unique: true })
   visitDate: Date;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', default: null })
   client: User;

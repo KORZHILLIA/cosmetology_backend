@@ -54,13 +54,13 @@ export class DatesController {
   }
 
   @Put('alter/:visitDateID')
-  @UsePipes(new JoiValidationPipe(joiAlterVisitDateSchema))
   @Role(Roles.Admin)
   async alterAvailableVisitDateByAdmin(
     @Request() req: Req,
     @Response({ passthrough: true }) res: Res,
     @Param('visitDateID') visitDateID: string,
-    @Body() body: AlterVisitDateByAdminBody,
+    @Body(new JoiValidationPipe(joiAlterVisitDateSchema))
+    body: AlterVisitDateByAdminBody,
   ) {
     const userWithUpdatedTokens = await this.userService.updateUserTokens(
       req,
