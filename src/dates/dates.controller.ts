@@ -30,7 +30,7 @@ import joiAddNewVisitDateSchema from 'src/schemas/dates.joiAddNewVisitDateSchema
 import joiAlterVisitDateSchema from 'src/schemas/dates.joiAlterVisitDateSchema';
 
 @UseGuards(RolesGuard, UsersGuard)
-@Controller('dates')
+@Controller('api/dates')
 export class DatesController {
   constructor(
     private datesService: DatesService,

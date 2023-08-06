@@ -29,7 +29,7 @@ import joiResendEmailSchema from 'src/schemas/user.joiResendEmailSchema';
 import joiSigninSchema from 'src/schemas/user.joiSigninSchema';
 
 @UseGuards(RolesGuard, UsersGuard)
-@Controller('users')
+@Controller('api/users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
