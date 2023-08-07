@@ -11,7 +11,7 @@ const sendMail = async (
     to,
     from: 'kiev_drum2006@ukr.net',
     subject: 'Email confirmation',
-    html: `<a href="${process.env.BASE_URL}/users/verify/${token}" target="_blank">Press to confirm signup</a>`,
+    html: `<a href="${process.env.BASE_URL}/api/users/verify/${token}" target="_blank">Press to confirm signup</a>`,
   };
   try {
     await sgMail.send(mail);
