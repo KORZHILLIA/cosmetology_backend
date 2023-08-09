@@ -191,7 +191,7 @@ export class UsersService {
   }
 
   prepareEncodedURL(userName: string, userEmail: string): string {
-    const baseUrl = this.configService.get<string>('BASE_URL');
+    const baseUrl = this.configService.get<string>('FRONTEND_URL');
     const encodedUserName = encodeStringForURL(userName);
     const encodedEmail = encodeStringForURL(userEmail);
     const encodedUrl = `${baseUrl}?userName=${encodedUserName}&userEmail=${encodedEmail}`;
