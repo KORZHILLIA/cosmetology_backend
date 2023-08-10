@@ -7,6 +7,7 @@ import { MongooseExceptionFilter } from './exceptions/mongoose-exception.filter'
 
 const corsOptions = {
   credentials: true,
+  origin: 'http://localhost:3000',
 };
 
 async function bootstrap() {
