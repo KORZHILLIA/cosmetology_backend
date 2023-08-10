@@ -84,7 +84,7 @@ export class UsersController {
       httpOnly: true,
       secure: false,
       domain: 'http://localhost:3000',
-      sameSite: 'strict',
+      sameSite: 'none',
     });
     return {
       name,
