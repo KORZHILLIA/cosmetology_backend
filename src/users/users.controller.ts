@@ -83,7 +83,7 @@ export class UsersController {
     res.cookie('refresh-token', refreshToken, {
       httpOnly: true,
       secure: true,
-      domain: 'cosmetology-backend.cyclic.app',
+      domain: '.cosmetology-backend.cyclic.app',
       path: '/',
       sameSite: 'none',
     });
