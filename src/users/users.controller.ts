@@ -83,7 +83,7 @@ export class UsersController {
     res.cookie('refresh-token', refreshToken, {
       httpOnly: true,
       secure: true,
-      domain: 'http://localhost:3000',
+      domain: 'https://cosmetology-frontend.vercel.app',
       path: '/auth/signin',
       sameSite: 'none',
     });

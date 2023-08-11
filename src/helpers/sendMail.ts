@@ -1,4 +1,3 @@
-// const sgMail = require('@sendgrid/mail');
 import * as sgMail from '@sendgrid/mail';
 
 const sendMail = async (
