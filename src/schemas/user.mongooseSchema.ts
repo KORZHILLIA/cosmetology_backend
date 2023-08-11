@@ -35,6 +35,8 @@ export class User {
   verificationToken: string;
   @Prop({ default: false })
   isVerified: boolean;
+  @Prop({ default: false })
+  isSigned: boolean;
   @Prop({ default: '' })
   accessToken: string;
   @Prop({ default: '' })

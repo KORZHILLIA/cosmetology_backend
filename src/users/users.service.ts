@@ -135,7 +135,11 @@ export class UsersService {
     const payload = { sub: user.email, username: user.name };
     const { accessToken, refreshToken } = await this.prepareTokens(payload);
     const signedUser = await this.userModel
-      .findByIdAndUpdate(user._id, { accessToken, refreshToken }, { new: true })
+      .findByIdAndUpdate(
+        user._id,
+        { accessToken, refreshToken, isSigned: true },
+        { new: true },
+      )
       .populate('futureVisitDates');
     return signedUser;
   }
@@ -146,7 +150,11 @@ export class UsersService {
     const payload = { sub: user.email, username: user.name };
     const { accessToken, refreshToken } = await this.prepareTokens(payload);
     const userWithUpdatedTokens = await this.userModel
-      .findByIdAndUpdate(user._id, { accessToken, refreshToken }, { new: true })
+      .findByIdAndUpdate(
+        user._id,
+        { accessToken, refreshToken, isSigned: true },
+        { new: true },
+      )
       .populate('futureVisitDates');
     return userWithUpdatedTokens;
   }
