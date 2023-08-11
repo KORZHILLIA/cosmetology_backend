@@ -73,6 +73,7 @@ export class UsersController {
       user.password,
     );
     const {
+      role,
       name,
       email,
       isVerified,
@@ -86,6 +87,7 @@ export class UsersController {
       sameSite: 'none',
     });
     return {
+      role,
       name,
       email,
       isVerified,
@@ -105,6 +107,7 @@ export class UsersController {
       res,
     );
     const {
+      role,
       name,
       email,
       isVerified,
@@ -113,6 +116,7 @@ export class UsersController {
       pastVisitDates,
     } = userWithUpdatedTokens;
     return {
+      role,
       name,
       email,
       isVerified,
