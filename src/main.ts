@@ -7,8 +7,8 @@ import { MongooseExceptionFilter } from './exceptions/mongoose-exception.filter'
 
 const corsOptions = {
   credentials: true,
-  origin: 'https://cosmetology-frontend.vercel.app',
-  exposedHeaders: ['set-cookie'],
+  origin: '*',
+  // exposedHeaders: ['set-cookie'],
 };
 
 async function bootstrap() {

@@ -24,6 +24,7 @@ import {
   SigninReqBody,
 } from 'src/interfaces/user.interface';
 import Roles from 'src/roles/roles.enum';
+import cookieConfig from 'src/constants/cookieConfig';
 import joiSignupSchema from 'src/schemas/user.joiSignupSchema';
 import joiResendEmailSchema from 'src/schemas/user.joiResendEmailSchema';
 import joiSigninSchema from 'src/schemas/user.joiSigninSchema';
@@ -81,10 +82,7 @@ export class UsersController {
       pastVisitDates,
     } = signedUser;
     res.cookie('refresh-token', refreshToken, {
-      httpOnly: true,
-      secure: true,
-      domain: '.cosmetology-backend.cyclic.app',
-      path: '/',
+      ...cookieConfig,
       sameSite: 'none',
     });
     return {

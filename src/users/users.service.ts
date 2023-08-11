@@ -19,6 +19,7 @@ import {
   PayloadForTokens,
   TokensPair,
 } from 'src/interfaces/user.interface';
+import cookieConfig from 'src/constants/cookieConfig';
 import Roles from 'src/roles/roles.enum';
 
 import hashPassword from 'src/helpers/hashPassword';
@@ -173,8 +174,8 @@ export class UsersService {
     const { sub } = req['user'];
     const userWithUpdatedTokens = await this.getCurrentUser(sub);
     res.cookie('refresh-token', userWithUpdatedTokens.refreshToken, {
-      httpOnly: true,
-      secure: false,
+      ...cookieConfig,
+      sameSite: 'none',
     });
     return userWithUpdatedTokens;
   }
