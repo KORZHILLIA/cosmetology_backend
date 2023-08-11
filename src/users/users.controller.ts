@@ -83,7 +83,7 @@ export class UsersController {
     res.cookie('refresh-token', refreshToken, {
       httpOnly: true,
       secure: true,
-      domain: '.localhost:3000',
+      domain: 'http://localhost:3000/auth/signin',
       sameSite: 'none',
     });
     return {
