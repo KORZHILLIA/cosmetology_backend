@@ -84,6 +84,7 @@ export class UsersController {
       httpOnly: true,
       secure: true,
       domain: 'http://localhost:3000',
+      path: '/auth/signin',
       sameSite: 'none',
     });
     return {
