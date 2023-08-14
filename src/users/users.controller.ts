@@ -130,6 +130,12 @@ export class UsersController {
     };
   }
 
+  @Post('signout')
+  async signout(@Body() email: string) {
+    await this.usersService.signoutUser(email);
+    return { message: 'Successfully signed out' };
+  }
+
   @Get('all')
   @Role(Roles.Admin)
   async getAll(@Request() req: Req, @Response({ passthrough: true }) res: Res) {

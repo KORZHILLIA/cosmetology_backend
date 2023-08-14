@@ -159,6 +159,18 @@ export class UsersService {
     return userWithUpdatedTokens;
   }
 
+  async signoutUser(email: string) {
+    const user = await this.checkIsUserInDBByEmail(email);
+    await this.userModel.findByIdAndUpdate(
+      user._id,
+      {
+        accessToken: '',
+        refreshToken: '',
+      },
+      { new: true },
+    );
+  }
+
   async prepareTokens(payload: PayloadForTokens): Promise<TokensPair> {
     const accessSecret = this.configService.get<string>('ACCESS_SECRET');
     const refreshSecret = this.configService.get<string>('REFRESH_SECRET');
