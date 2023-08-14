@@ -22,6 +22,7 @@ import {
   SignupReqBody,
   ResendEmailReqBody,
   SigninReqBody,
+  SignoutReqBody,
 } from 'src/interfaces/user.interface';
 import Roles from 'src/roles/roles.enum';
 import cookieConfig from 'src/constants/cookieConfig';
@@ -131,8 +132,8 @@ export class UsersController {
   }
 
   @Post('signout')
-  async signout(@Body() email: string) {
-    await this.usersService.signoutUser(email);
+  async signout(@Body() body: SignoutReqBody) {
+    await this.usersService.signoutUser(body.email);
     return { message: 'Successfully signed out' };
   }
 

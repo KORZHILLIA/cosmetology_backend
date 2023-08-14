@@ -13,6 +13,10 @@ export interface SigninReqBody {
   password: string;
 }
 
+export interface SignoutReqBody {
+  email: string;
+}
+
 export interface PayloadForTokens {
   sub: string;
   username: string;
