@@ -79,8 +79,8 @@ export class DatesService {
     if (!userWithReservedVisitDate) {
       throw new NotFoundException('User not found');
     }
-    const { accessToken } = userWithReservedVisitDate;
-    return { accessToken, reservedVisitDateID };
+    const { accessToken, _id: userId } = userWithReservedVisitDate;
+    return { userId, accessToken, reservedVisitDateID };
   }
 
   async refuseVisitDate(visitDateID: string, userID: Types.ObjectId) {

@@ -121,12 +121,12 @@ export class DatesController {
       req,
       res,
     );
-    const { accessToken, reservedVisitDateID } =
+    const { userId, accessToken, reservedVisitDateID } =
       await this.datesService.reserveVisitDate(
         visitDateID,
         userWithUpdatedTokens._id,
       );
-    return { accessToken, reservedVisitDateID };
+    return { userId, accessToken, reservedVisitDateID };
   }
 
   @Post('confirm/:visitDateID')
