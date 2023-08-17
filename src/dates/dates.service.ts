@@ -38,7 +38,7 @@ export class DatesService {
     return updatedAvailableVisitDateByAdmin;
   }
 
-  async deleteVisitDate(visitDateID: string): Promise<void> {
+  async deleteVisitDate(visitDateID: string): Promise<Types.ObjectId> {
     const requiredVisitDate = await this.visitDateModel.findById(visitDateID);
     if (!requiredVisitDate) {
       throw new NotFoundException('There is no such visit date');
@@ -46,7 +46,10 @@ export class DatesService {
     if (requiredVisitDate.client) {
       throw new ForbiddenException('This date has the client');
     }
-    await this.visitDateModel.findByIdAndDelete(visitDateID);
+    const deletedDate = await this.visitDateModel.findByIdAndDelete(
+      visitDateID,
+    );
+    return deletedDate._id;
   }
 
   async getAllVisitDates() {

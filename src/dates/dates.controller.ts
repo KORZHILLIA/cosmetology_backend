@@ -85,9 +85,13 @@ export class DatesController {
       req,
       res,
     );
-    await this.datesService.deleteVisitDate(visitDateID);
+    const id = await this.datesService.deleteVisitDate(visitDateID);
     const { accessToken } = userWithUpdatedTokens;
-    return { accessToken, message: 'Visit date has been deleted' };
+    return {
+      accessToken,
+      message: 'Visit date has been deleted',
+      id,
+    };
   }
 
   @Get('all')
