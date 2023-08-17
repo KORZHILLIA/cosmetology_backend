@@ -63,19 +63,24 @@ export class DatesService {
     const requiredVisitDate = await this.updateVisitDate(visitDateID, {
       client: userID,
     });
+    const reservedVisitDateID = requiredVisitDate._id;
     const userWithReservedVisitDate = await this.userModel
       .findByIdAndUpdate(
         userID,
         {
           $addToSet: {
-            futureVisitDates: visitDateID,
+            futureVisitDates: reservedVisitDateID,
             pastVisitDates: { date: requiredVisitDate.visitDate },
           },
         },
         { new: true },
       )
       .populate('futureVisitDates');
-    return userWithReservedVisitDate;
+    if (!userWithReservedVisitDate) {
+      throw new NotFoundException('User not found');
+    }
+    const { accessToken } = userWithReservedVisitDate;
+    return { accessToken, reservedVisitDateID };
   }
 
   async refuseVisitDate(visitDateID: string, userID: Types.ObjectId) {
