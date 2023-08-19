@@ -92,16 +92,18 @@ export class DatesService {
       client: null,
       isConfirmed: false,
     });
-    const userWithoutVisitDate = await this.userModel.findByIdAndUpdate(
-      userID,
-      {
-        $pull: {
-          futureVisitDates: visitDateID,
-          pastVisitDates: { date: visitDateFreeAgain.visitDate },
+    const userWithoutVisitDate = await this.userModel
+      .findByIdAndUpdate(
+        userID,
+        {
+          $pull: {
+            futureVisitDates: visitDateID,
+            pastVisitDates: { date: visitDateFreeAgain.visitDate },
+          },
         },
-      },
-      { new: true },
-    );
+        { new: true },
+      )
+      .populate('futureVisitDates');
     if (!userWithoutVisitDate) {
       throw new NotFoundException('User not found');
     }
