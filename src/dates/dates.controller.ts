@@ -140,9 +140,13 @@ export class DatesController {
       req,
       res,
     );
-    await this.datesService.confirmVisitDate(visitDateID);
+    const { _id } = await this.datesService.confirmVisitDate(visitDateID);
     const { accessToken } = userWithUpdatedTokens;
-    return { accessToken, message: 'Visit date successfully confirmed' };
+    return {
+      accessToken,
+      dateId: _id,
+      message: 'Visit date successfully confirmed',
+    };
   }
 
   @Post('refuse/:visitDateID')
