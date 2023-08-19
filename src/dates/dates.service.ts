@@ -55,7 +55,7 @@ export class DatesService {
   async getAllVisitDates() {
     const allVisitDates = await this.visitDateModel
       .find({})
-      .populate('client', '_id');
+      .populate('client', 'name');
     return allVisitDates;
   }
 
