@@ -70,7 +70,10 @@ export class DatesService {
         {
           $addToSet: {
             futureVisitDates: reservedVisitDateID,
-            pastVisitDates: { date: requiredVisitDate.visitDate },
+            pastVisitDates: {
+              date: requiredVisitDate.visitDate,
+              postConfirmed: false,
+            },
           },
         },
         { new: true },

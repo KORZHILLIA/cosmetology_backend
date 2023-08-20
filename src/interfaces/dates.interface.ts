@@ -12,4 +12,5 @@ export interface AlterVisitDateByAdminBody {
 
 export interface PastVisitDate {
   date: Date;
+  postConfirmed: boolean;
 }

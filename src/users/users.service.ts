@@ -74,7 +74,6 @@ export class UsersService {
       userNotPreparedForVerificationYet._id,
     );
     const encodedURL = this.prepareEncodedURL(
-      userPreparedForVerification.name,
       userPreparedForVerification.email,
     );
     return encodedURL;
@@ -190,6 +189,16 @@ export class UsersService {
     return users;
   }
 
+  async postConfirmVisitDate(userEmail: string, visitDate: string) {
+    const user = await this.checkIsUserInDBByEmail(userEmail);
+    console.log(user);
+    await this.userModel.updateOne(
+      { _id: user._id, 'futureVisitDates.date': visitDate },
+      { $set: { 'futureVisitDates.$.postConfirmed': true } },
+    );
+    return { email: userEmail, date: visitDate };
+  }
+
   async updateUserTokens(req: Req, res: Res) {
     const { sub } = req['user'];
     const userWithUpdatedTokens = await this.getCurrentUser(sub);
@@ -211,7 +220,7 @@ export class UsersService {
     });
   }
 
-  prepareEncodedURL(userName: string, userEmail: string): string {
+  prepareEncodedURL(userEmail: string): string {
     const baseUrl = this.configService.get<string>('FRONTEND_URL');
     const encodedEmail = encodeStringForURL(userEmail);
     const encodedUrl = `${baseUrl}?userEmail=${encodedEmail}`;

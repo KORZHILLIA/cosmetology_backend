@@ -1,3 +1,5 @@
+import Roles from 'src/roles/roles.enum';
+
 export interface SignupReqBody {
   name: string;
   email: string;
@@ -15,6 +17,11 @@ export interface SigninReqBody {
 
 export interface SignoutReqBody {
   email: string;
+}
+
+export interface PostConfirmVisitDateBody {
+  role: Roles.Admin;
+  visitDate: string;
 }
 
 export interface PayloadForTokens {

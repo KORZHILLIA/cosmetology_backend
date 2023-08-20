@@ -23,12 +23,14 @@ import {
   ResendEmailReqBody,
   SigninReqBody,
   SignoutReqBody,
+  PostConfirmVisitDateBody,
 } from 'src/interfaces/user.interface';
 import Roles from 'src/roles/roles.enum';
 import cookieConfig from 'src/constants/cookieConfig';
 import joiSignupSchema from 'src/schemas/user.joiSignupSchema';
 import joiResendEmailSchema from 'src/schemas/user.joiResendEmailSchema';
 import joiSigninSchema from 'src/schemas/user.joiSigninSchema';
+import joiPostConfirmVisitDateSchema from 'src/schemas/user.joiPostConfirmVisitDateSchema';
 
 @UseGuards(RolesGuard, UsersGuard)
 @Controller('api/users')
@@ -146,5 +148,25 @@ export class UsersController {
     );
     const users = await this.usersService.getAllUsers();
     return { accsessToken: userWithUpdatedTokens.accessToken, users };
+  }
+
+  @Post('postconfirm/:userEmail')
+  @Role(Roles.Admin)
+  async postConfirm(
+    @Request() req: Req,
+    @Response({ passthrough: true }) res: Res,
+    @Param('userEmail') userEmail: string,
+    @Body(new JoiValidationPipe(joiPostConfirmVisitDateSchema))
+    body: PostConfirmVisitDateBody,
+  ) {
+    const userWithUpdatedTokens = await this.usersService.updateUserTokens(
+      req,
+      res,
+    );
+    const { email, date } = await this.usersService.postConfirmVisitDate(
+      userEmail,
+      body.visitDate,
+    );
+    return { accessToken: userWithUpdatedTokens.accessToken, email, date };
   }
 }
