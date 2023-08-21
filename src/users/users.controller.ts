@@ -163,10 +163,12 @@ export class UsersController {
       req,
       res,
     );
-    const { email, date } = await this.usersService.postConfirmVisitDate(
-      userEmail,
-      body.visitDate,
-    );
-    return { accessToken: userWithUpdatedTokens.accessToken, email, date };
+    const { email, pastVisitDates } =
+      await this.usersService.postConfirmVisitDate(userEmail, body.visitDate);
+    return {
+      accessToken: userWithUpdatedTokens.accessToken,
+      email,
+      pastVisitDates,
+    };
   }
 }

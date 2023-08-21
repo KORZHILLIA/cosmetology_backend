@@ -26,6 +26,7 @@ import hashPassword from 'src/helpers/hashPassword';
 import sendMail from 'src/helpers/sendMail';
 import encodeStringForURL from 'src/helpers/encodeStringForURL';
 import comparePasswords from 'src/helpers/comparePasswords';
+import { error } from 'console';
 
 @Injectable()
 export class UsersService {
@@ -191,12 +192,18 @@ export class UsersService {
 
   async postConfirmVisitDate(userEmail: string, visitDate: string) {
     const user = await this.checkIsUserInDBByEmail(userEmail);
-    console.log(user);
-    await this.userModel.updateOne(
-      { _id: user._id, 'futureVisitDates.date': visitDate },
-      { $set: { 'futureVisitDates.$.postConfirmed': true } },
+    const userWithPostConfirmedDate = await this.userModel.findOneAndUpdate({
+      _id: user._id,
+    });
+    const requiredIdx = userWithPostConfirmedDate.pastVisitDates.findIndex(
+      (obj) => obj.date.toISOString() === visitDate,
     );
-    return { email: userEmail, date: visitDate };
+    userWithPostConfirmedDate.pastVisitDates.splice(requiredIdx, 1, {
+      date: new Date(visitDate),
+      postConfirmed: true,
+    });
+    await userWithPostConfirmedDate.save();
+    return userWithPostConfirmedDate;
   }
 
   async updateUserTokens(req: Req, res: Res) {
