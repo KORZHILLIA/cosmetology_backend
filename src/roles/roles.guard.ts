@@ -22,7 +22,10 @@ export class RolesGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest();
-    if (request.body.role === requiredRole) {
+    if (
+      request.body.role === requiredRole ||
+      request.query.role === requiredRole
+    ) {
       return true;
     }
     throw new UnauthorizedException('You do not have required rights');
