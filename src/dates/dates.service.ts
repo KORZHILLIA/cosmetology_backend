@@ -86,8 +86,15 @@ export class DatesService {
       accessToken,
       _id: userId,
       futureVisitDates,
+      pastVisitDates,
     } = userWithReservedVisitDate;
-    return { userId, accessToken, reservedVisitDateID, futureVisitDates };
+    return {
+      userId,
+      accessToken,
+      reservedVisitDateID,
+      futureVisitDates,
+      pastVisitDates,
+    };
   }
 
   async refuseVisitDate(visitDateID: string, userID: Types.ObjectId) {

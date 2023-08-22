@@ -121,12 +121,23 @@ export class DatesController {
       req,
       res,
     );
-    const { userId, accessToken, reservedVisitDateID, futureVisitDates } =
-      await this.datesService.reserveVisitDate(
-        visitDateID,
-        userWithUpdatedTokens._id,
-      );
-    return { userId, accessToken, reservedVisitDateID, futureVisitDates };
+    const {
+      userId,
+      accessToken,
+      reservedVisitDateID,
+      futureVisitDates,
+      pastVisitDates,
+    } = await this.datesService.reserveVisitDate(
+      visitDateID,
+      userWithUpdatedTokens._id,
+    );
+    return {
+      userId,
+      accessToken,
+      reservedVisitDateID,
+      futureVisitDates,
+      pastVisitDates,
+    };
   }
 
   @Post('confirm/:visitDateID')
@@ -164,7 +175,8 @@ export class DatesController {
       visitDateID,
       userWithUpdatedTokens._id,
     );
-    const { accessToken, futureVisitDates } = userWithoutVisitDate;
-    return { accessToken, futureVisitDates };
+    const { accessToken, futureVisitDates, pastVisitDates } =
+      userWithoutVisitDate;
+    return { accessToken, futureVisitDates, pastVisitDates };
   }
 }
