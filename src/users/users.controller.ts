@@ -103,7 +103,7 @@ export class UsersController {
     };
   }
 
-  @Post('outerSignup')
+  @Post('signupouter')
   async outerSignup(
     @Body() body: OuterSignupReqBody,
     @Response({ passthrough: true }) res: Res,

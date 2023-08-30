@@ -1,3 +1,9 @@
-const notGuardedPaths = ['signup', 'verify', 'resendEmail', 'signin'];
+const notGuardedPaths = [
+  'signup',
+  'signupouter',
+  'verify',
+  'resendEmail',
+  'signin',
+];
 
 export default notGuardedPaths;
