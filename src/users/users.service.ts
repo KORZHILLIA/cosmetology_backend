@@ -44,6 +44,7 @@ export class UsersService {
   }
 
   async signupOuterUser(body: OuterSignupReqBody) {
+    // console.log(body);
     const { name, email } = body;
     const user = await this.userModel.findOne({ email });
     if (!user) {
@@ -51,7 +52,7 @@ export class UsersService {
       const adminEmail = this.configService.get<string>('ADMIN_EMAIL');
       const userRole = email === adminEmail ? Roles.Admin : Roles.User;
 
-      const payload = { sub: user.email, username: user.name };
+      const payload = { sub: email, username: name };
       const { accessToken, refreshToken } = await this.prepareTokens(payload);
 
       const newOuterUser = await this.userModel.create({
