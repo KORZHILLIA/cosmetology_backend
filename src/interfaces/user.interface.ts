@@ -6,6 +6,11 @@ export interface SignupReqBody {
   password: string;
 }
 
+export interface OuterSignupReqBody {
+  name: string;
+  email: string;
+}
+
 export interface ResendEmailReqBody {
   email: string;
 }

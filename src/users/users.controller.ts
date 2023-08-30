@@ -20,6 +20,7 @@ import { RolesGuard } from 'src/roles/roles.guard';
 
 import {
   SignupReqBody,
+  OuterSignupReqBody,
   ResendEmailReqBody,
   SigninReqBody,
   SignoutReqBody,
@@ -68,12 +69,12 @@ export class UsersController {
   @Post('signin')
   @UsePipes(new JoiValidationPipe(joiSigninSchema))
   async signin(
-    @Body() user: SigninReqBody,
+    @Body() body: SigninReqBody,
     @Response({ passthrough: true }) res: Res,
   ) {
     const signedUser = await this.usersService.updateUserIsSigned(
-      user.email,
-      user.password,
+      body.email,
+      body.password,
     );
     const {
       role,
@@ -86,6 +87,39 @@ export class UsersController {
       futureVisitDates,
       pastVisitDates,
     } = signedUser;
+    res.cookie('refresh-token', refreshToken, {
+      ...cookieConfig,
+      sameSite: 'none',
+    });
+    return {
+      role,
+      name,
+      email,
+      isVerified,
+      isSigned,
+      accessToken,
+      futureVisitDates,
+      pastVisitDates,
+    };
+  }
+
+  @Post('outerSignup')
+  async outerSignup(
+    @Body() body: OuterSignupReqBody,
+    @Response({ passthrough: true }) res: Res,
+  ) {
+    const newOuterUser = await this.usersService.signupOuterUser(body);
+    const {
+      role,
+      name,
+      email,
+      isVerified,
+      isSigned,
+      accessToken,
+      refreshToken,
+      futureVisitDates,
+      pastVisitDates,
+    } = newOuterUser;
     res.cookie('refresh-token', refreshToken, {
       ...cookieConfig,
       sameSite: 'none',

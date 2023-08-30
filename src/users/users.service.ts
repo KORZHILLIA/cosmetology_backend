@@ -16,6 +16,7 @@ import { User } from 'src/schemas/user.mongooseSchema';
 import { VisitDate } from 'src/schemas/dates.mongooseSchema';
 import {
   SignupReqBody,
+  OuterSignupReqBody,
   PayloadForTokens,
   TokensPair,
 } from 'src/interfaces/user.interface';
@@ -26,7 +27,6 @@ import hashPassword from 'src/helpers/hashPassword';
 import sendMail from 'src/helpers/sendMail';
 import encodeStringForURL from 'src/helpers/encodeStringForURL';
 import comparePasswords from 'src/helpers/comparePasswords';
-import { error } from 'console';
 
 @Injectable()
 export class UsersService {
@@ -41,6 +41,50 @@ export class UsersService {
     await this.checkIsUserNotInDBByEmail(user.email);
     const newUser = await this.createNewUser(user);
     await this.sendVerificationEmail(newUser.email, newUser.verificationToken);
+  }
+
+  async signupOuterUser(body: OuterSignupReqBody) {
+    const { name, email } = body;
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      const hashedPassword = await hashPassword(nanoid(8));
+      const adminEmail = this.configService.get<string>('ADMIN_EMAIL');
+      const userRole = email === adminEmail ? Roles.Admin : Roles.User;
+
+      const payload = { sub: user.email, username: user.name };
+      const { accessToken, refreshToken } = await this.prepareTokens(payload);
+
+      const newOuterUser = await this.userModel.create({
+        name,
+        email,
+        role: userRole,
+        password: hashedPassword,
+        accessToken,
+        refreshToken,
+        isVerified: true,
+        isSigned: true,
+        isOuter: true,
+      });
+      return newOuterUser;
+    }
+    if (user && user.isOuter) {
+      await this.cleanDeadVisitDatesRefs(user);
+      const payload = { sub: user.email, username: user.name };
+      const { accessToken, refreshToken } = await this.prepareTokens(payload);
+      const userWithUpdatedTokens = await this.userModel
+        .findByIdAndUpdate(
+          user._id,
+          { accessToken, refreshToken, isSigned: true },
+          { new: true },
+        )
+        .populate('futureVisitDates');
+      return userWithUpdatedTokens;
+    }
+    if (user && !user.isOuter) {
+      throw new ConflictException(
+        'This user already exists. Try enter by email/password',
+      );
+    }
   }
 
   async checkIsUserNotInDBByEmail(email: string): Promise<void> {

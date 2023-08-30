@@ -31,8 +31,8 @@ export class User {
   futureVisitDates: VisitDate[];
   @Prop({ default: [] })
   pastVisitDates: PastVisitDate[];
-  // @Prop({ default: [] })
-  // pastVisitDates: { date: Date; postConfirmed: boolean }[];
+  @Prop({ default: false })
+  isOuter: boolean;
   @Prop({ default: '' })
   verificationToken: string;
   @Prop({ default: false })
