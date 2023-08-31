@@ -18,6 +18,7 @@ export interface ResendEmailReqBody {
 export interface SigninReqBody {
   email: string;
   password: string;
+  isRemember: boolean;
 }
 
 export interface SignoutReqBody {

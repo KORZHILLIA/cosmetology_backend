@@ -75,6 +75,7 @@ export class UsersController {
     const signedUser = await this.usersService.updateUserIsSigned(
       body.email,
       body.password,
+      body.isRemember,
     );
     const {
       role,

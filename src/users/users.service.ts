@@ -44,7 +44,6 @@ export class UsersService {
   }
 
   async signupOuterUser(body: OuterSignupReqBody) {
-    // console.log(body);
     const { name, email } = body;
     const user = await this.userModel.findOne({ email });
     if (!user) {
@@ -168,7 +167,11 @@ export class UsersService {
     return user;
   }
 
-  async updateUserIsSigned(email: string, password: string) {
+  async updateUserIsSigned(
+    email: string,
+    password: string,
+    isRemember: boolean,
+  ) {
     const user = await this.checkIsUserInDBByEmail(email);
     if (!user.isVerified) {
       throw new ConflictException('Please verify your email first');
@@ -178,7 +181,10 @@ export class UsersService {
       throw new UnauthorizedException('This password is invalid');
     }
     const payload = { sub: user.email, username: user.name };
-    const { accessToken, refreshToken } = await this.prepareTokens(payload);
+    const { accessToken, refreshToken } = await this.prepareTokens(
+      payload,
+      isRemember,
+    );
     const signedUser = await this.userModel
       .findByIdAndUpdate(
         user._id,
@@ -216,16 +222,19 @@ export class UsersService {
     );
   }
 
-  async prepareTokens(payload: PayloadForTokens): Promise<TokensPair> {
+  async prepareTokens(
+    payload: PayloadForTokens,
+    isRemember: boolean = false,
+  ): Promise<TokensPair> {
     const accessSecret = this.configService.get<string>('ACCESS_SECRET');
     const refreshSecret = this.configService.get<string>('REFRESH_SECRET');
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: accessSecret,
-      expiresIn: '20m',
+      expiresIn: isRemember ? '2m' : '1m',
     });
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: refreshSecret,
-      expiresIn: '30m',
+      expiresIn: isRemember ? '4m' : '3m',
     });
     return { accessToken, refreshToken };
   }
