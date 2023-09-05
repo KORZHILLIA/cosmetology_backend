@@ -260,6 +260,32 @@ export class UsersService {
     return userWithPostConfirmedDate;
   }
 
+  async askToUpdatePassword(userEmail: string) {
+    const user = await this.checkIsUserInDBByEmail(userEmail);
+    if (user.isOuter) {
+      throw new ConflictException(
+        'No password provided, try to enter via Google',
+      );
+    }
+    if (!user.isVerified) {
+      throw new ConflictException('Please verify your email first');
+    }
+    return user.email;
+  }
+
+  async updatePassword(userEmail: string, password: string) {
+    const user = await this.checkIsUserInDBByEmail(userEmail);
+    const hashedPassword = await hashPassword(password);
+    const userWithUpdatedPassword = await this.userModel.findByIdAndUpdate(
+      user._id,
+      {
+        password: hashedPassword,
+      },
+      { new: true },
+    );
+    return userWithUpdatedPassword;
+  }
+
   async updateUserTokens(req: Req, res: Res) {
     const { sub } = req['user'];
     const userWithUpdatedTokens = await this.getCurrentUser(sub);

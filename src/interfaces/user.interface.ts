@@ -30,6 +30,10 @@ export interface PostConfirmVisitDateBody {
   visitDate: string;
 }
 
+export interface ChangePasswordBody {
+  password: string;
+}
+
 export interface PayloadForTokens {
   sub: string;
   username: string;

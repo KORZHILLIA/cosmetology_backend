@@ -23,6 +23,7 @@ export class UsersGuard implements CanActivate {
       return true;
     } else {
       try {
+        console.log('try access');
         const accessToken = this.extractAccessTokenFromHeader(request);
         const accessSecret = this.configService.get<string>('ACCESS_SECRET');
         const payload = await this.jwtService.verifyAsync(accessToken, {
@@ -32,6 +33,7 @@ export class UsersGuard implements CanActivate {
         return true;
       } catch {
         try {
+          console.log('try refresh');
           const refreshToken = this.extractRefreshTokenFromCookies(request);
           const refreshSecret =
             this.configService.get<string>('REFRESH_SECRET');
@@ -41,6 +43,7 @@ export class UsersGuard implements CanActivate {
           request.user = payload;
           return true;
         } catch {
+          console.log('not');
           throw new UnauthorizedException('Not authorized');
         }
       }

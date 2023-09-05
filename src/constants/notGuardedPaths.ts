@@ -4,6 +4,8 @@ const notGuardedPaths = [
   'verify',
   'resendEmail',
   'signin',
+  'forgotpassword',
+  'newpassword',
 ];
 
 export default notGuardedPaths;

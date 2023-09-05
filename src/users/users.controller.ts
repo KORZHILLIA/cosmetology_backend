@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Patch,
   Get,
   Body,
   Param,
@@ -25,6 +26,7 @@ import {
   SigninReqBody,
   SignoutReqBody,
   PostConfirmVisitDateBody,
+  ChangePasswordBody,
 } from 'src/interfaces/user.interface';
 import Roles from 'src/roles/roles.enum';
 import cookieConfig from 'src/constants/cookieConfig';
@@ -32,6 +34,7 @@ import joiSignupSchema from 'src/schemas/user.joiSignupSchema';
 import joiResendEmailSchema from 'src/schemas/user.joiResendEmailSchema';
 import joiSigninSchema from 'src/schemas/user.joiSigninSchema';
 import joiPostConfirmVisitDateSchema from 'src/schemas/user.joiPostConfirmVisitDateSchema';
+import joiChangePasswordSchema from 'src/schemas/user.joiChangePasswordSchema';
 
 @UseGuards(RolesGuard, UsersGuard)
 @Controller('api/users')
@@ -58,13 +61,6 @@ export class UsersController {
     await this.usersService.resendVerificationEmail(body.email);
     return { message: 'Confirmation email has been sent again' };
   }
-
-  // @Post('signin')
-  // @UsePipes(new JoiValidationPipe(joiSigninSchema))
-  // async signin(@Body() user: SigninReqBody, @Response() res: Res) {
-  //     const signedUser = await this.usersService.updateUserIsSigned(user.email, user.password);
-  //     return res.set({ 'refresh-token': signedUser.refreshToken }).json(signedUser);
-  // }
 
   @Post('signin')
   @UsePipes(new JoiValidationPipe(joiSigninSchema))
@@ -205,5 +201,24 @@ export class UsersController {
       email,
       pastVisitDates,
     };
+  }
+
+  @Get('forgotpassword/:userEmail')
+  async askToChangePassword(@Param('userEmail') userEmail: string) {
+    const email = await this.usersService.askToUpdatePassword(userEmail);
+    return { email, message: 'You now may change your password' };
+  }
+
+  @Patch('newpassword/:userEmail')
+  async changePassword(
+    @Param('userEmail') userEmail: string,
+    @Body(new JoiValidationPipe(joiChangePasswordSchema))
+    body: ChangePasswordBody,
+  ) {
+    const { email } = await this.usersService.updatePassword(
+      userEmail,
+      body.password,
+    );
+    return { email, message: 'Password changed' };
   }
 }
