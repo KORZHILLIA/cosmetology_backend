@@ -230,11 +230,11 @@ export class UsersService {
     const refreshSecret = this.configService.get<string>('REFRESH_SECRET');
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: accessSecret,
-      expiresIn: isRemember ? '2m' : '1m',
+      expiresIn: isRemember ? '60m' : '30m',
     });
     const refreshToken = await this.jwtService.signAsync(payload, {
       secret: refreshSecret,
-      expiresIn: isRemember ? '4m' : '3m',
+      expiresIn: isRemember ? '14d' : '7d',
     });
     return { accessToken, refreshToken };
   }
