@@ -246,18 +246,15 @@ export class UsersService {
 
   async postConfirmVisitDate(userEmail: string, visitDate: string) {
     const user = await this.checkIsUserInDBByEmail(userEmail);
-    const userWithPostConfirmedDate = await this.userModel.findOneAndUpdate({
-      _id: user._id,
-    });
-    const requiredIdx = userWithPostConfirmedDate.pastVisitDates.findIndex(
+    const requiredIdx = user.pastVisitDates.findIndex(
       (obj) => obj.date.toISOString() === visitDate,
     );
-    userWithPostConfirmedDate.pastVisitDates.splice(requiredIdx, 1, {
+    user.pastVisitDates.splice(requiredIdx, 1, {
       date: new Date(visitDate),
       postConfirmed: true,
     });
-    await userWithPostConfirmedDate.save();
-    return userWithPostConfirmedDate;
+    await user.save();
+    return user;
   }
 
   async askToUpdatePassword(userEmail: string) {
